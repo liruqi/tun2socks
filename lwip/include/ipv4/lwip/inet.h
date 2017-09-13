@@ -40,7 +40,7 @@
 extern "C" {
 #endif
 
-/** For compatibility with BSD code */
+///** For compatibility with BSD code */
 //struct in_addr {
 //  u32_t s_addr;
 //};

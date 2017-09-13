@@ -212,50 +212,47 @@ tcp_input(struct pbuf *p, struct netif *inp)
 
     /* Finally, if we still did not get a match, we check all PCBs that
        are LISTENing for incoming connections. */
-      
-    /* tun2socks: we are listening on any ip on any ports. */
     prev = NULL;
-    lpcb = tcp_listen_pcbs.listen_pcbs;
-//    for(lpcb = tcp_listen_pcbs.listen_pcbs; lpcb != NULL; lpcb = lpcb->next) {
-//      if (lpcb->local_port == tcphdr->dest) {
-//#if SO_REUSE
-//        if (ip_addr_cmp(&(lpcb->local_ip), &current_iphdr_dest)) {
-//          /* found an exact match */
-//          break;
-//        } else if(ip_addr_isany(&(lpcb->local_ip))) {
-//          /* found an ANY-match */
-//          lpcb_any = lpcb;
-//          lpcb_prev = prev;
-//        }
-//#else /* SO_REUSE */
-//        if (ip_addr_cmp(&(lpcb->local_ip), &current_iphdr_dest) ||
-//            ip_addr_isany(&(lpcb->local_ip))) {
-//          /* found a match */
-//          break;
-//        }
-//#endif /* SO_REUSE */
-//      }
+    for(lpcb = tcp_listen_pcbs.listen_pcbs; lpcb != NULL; lpcb = lpcb->next) {
+      if (lpcb->local_port == tcphdr->dest) {
+#if SO_REUSE
+        if (ip_addr_cmp(&(lpcb->local_ip), &current_iphdr_dest)) {
+          /* found an exact match */
+          break;
+        } else if(ip_addr_isany(&(lpcb->local_ip))) {
+          /* found an ANY-match */
+          lpcb_any = lpcb;
+          lpcb_prev = prev;
+        }
+#else /* SO_REUSE */
+        if (ip_addr_cmp(&(lpcb->local_ip), &current_iphdr_dest) ||
+            ip_addr_isany(&(lpcb->local_ip))) {
+          /* found a match */
+          break;
+        }
+#endif /* SO_REUSE */
+      }
       prev = (struct tcp_pcb *)lpcb;
-//    }
-//#if SO_REUSE
-//    /* first try specific local IP */
-//    if (lpcb == NULL) {
-//      /* only pass to ANY if no specific local IP has been found */
-//      lpcb = lpcb_any;
-//      prev = lpcb_prev;
-//    }
-//#endif /* SO_REUSE */
+    }
+#if SO_REUSE
+    /* first try specific local IP */
+    if (lpcb == NULL) {
+      /* only pass to ANY if no specific local IP has been found */
+      lpcb = lpcb_any;
+      prev = lpcb_prev;
+    }
+#endif /* SO_REUSE */
     if (lpcb != NULL) {
       /* Move this PCB to the front of the list so that subsequent
          lookups will be faster (we exploit locality in TCP segment
          arrivals). */
-//      if (prev != NULL) {
-//        ((struct tcp_pcb_listen *)prev)->next = lpcb->next;
-//              /* our successor is the remainder of the listening list */
-//        lpcb->next = tcp_listen_pcbs.listen_pcbs;
-//              /* put this listening pcb at the head of the listening list */
-//        tcp_listen_pcbs.listen_pcbs = lpcb;
-//      }
+      if (prev != NULL) {
+        ((struct tcp_pcb_listen *)prev)->next = lpcb->next;
+              /* our successor is the remainder of the listening list */
+        lpcb->next = tcp_listen_pcbs.listen_pcbs;
+              /* put this listening pcb at the head of the listening list */
+        tcp_listen_pcbs.listen_pcbs = lpcb;
+      }
     
       LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: packed for LISTENing connection.\n"));
       tcp_listen_input(lpcb);
@@ -479,10 +476,8 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
     pcb->accepts_pending++;
 #endif /* TCP_LISTEN_BACKLOG */
     /* Set up the new PCB. */
-    
-    /* tun2socks: set up the new PCB based on the incoming packet. For the best compatibility, just imaging that we are running a virtual server that handles all the request from localhost, so the local_ip is actually the remote server ip (since this stack is running as a stack of remote server). */
     ip_addr_copy(npcb->local_ip, current_iphdr_dest);
-    npcb->local_port = tcphdr->dest;
+    npcb->local_port = pcb->local_port;
     ip_addr_copy(npcb->remote_ip, current_iphdr_src);
     npcb->remote_port = tcphdr->src;
     npcb->state = SYN_RCVD;

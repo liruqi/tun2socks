@@ -398,50 +398,48 @@ ip_input(struct pbuf *p, struct netif *inp)
     /* start trying with inp. if that's not acceptable, start walking the
        list of configured netifs.
        'first' is used as a boolean to mark whether we started walking the list */
-//    int first = 1;
-      
-      /* tun2socks: do not lookup network interface */
+    int first = 1;
     netif = inp;
-//    do {
-//      LWIP_DEBUGF(IP_DEBUG, ("ip_input: iphdr->dest 0x%"X32_F" netif->ip_addr 0x%"X32_F" (0x%"X32_F", 0x%"X32_F", 0x%"X32_F")\n",
-//          ip4_addr_get_u32(&iphdr->dest), ip4_addr_get_u32(&netif->ip_addr),
-//          ip4_addr_get_u32(&iphdr->dest) & ip4_addr_get_u32(&netif->netmask),
-//          ip4_addr_get_u32(&netif->ip_addr) & ip4_addr_get_u32(&netif->netmask),
-//          ip4_addr_get_u32(&iphdr->dest) & ~ip4_addr_get_u32(&netif->netmask)));
-//
-//      /* interface is up and configured? */
-//      if ((netif_is_up(netif)) && (!ip_addr_isany(&(netif->ip_addr)))) {
-//        /* unicast to this interface address? */
-//        if (ip_addr_cmp(&current_iphdr_dest, &(netif->ip_addr)) ||
-//            /* or broadcast on this interface network address? */
-//            ip_addr_isbroadcast(&current_iphdr_dest, netif)) {
-//          LWIP_DEBUGF(IP_DEBUG, ("ip_input: packet accepted on interface %c%c\n",
-//              netif->name[0], netif->name[1]));
-//          /* break out of for loop */
-//          break;
-//        }
-//#if LWIP_AUTOIP
-//        /* connections to link-local addresses must persist after changing
-//           the netif's address (RFC3927 ch. 1.9) */
-//        if ((netif->autoip != NULL) &&
-//            ip_addr_cmp(&current_iphdr_dest, &(netif->autoip->llipaddr))) {
-//          LWIP_DEBUGF(IP_DEBUG, ("ip_input: LLA packet accepted on interface %c%c\n",
-//              netif->name[0], netif->name[1]));
-//          /* break out of for loop */
-//          break;
-//        }
-//#endif /* LWIP_AUTOIP */
-//      }
-//      if (first) {
-//        first = 0;
-//        netif = netif_list;
-//      } else {
-//        netif = netif->next;
-//      }
-//      if (netif == inp) {
-//        netif = netif->next;
-//      }
-//    } while(netif != NULL);
+    do {
+      LWIP_DEBUGF(IP_DEBUG, ("ip_input: iphdr->dest 0x%"X32_F" netif->ip_addr 0x%"X32_F" (0x%"X32_F", 0x%"X32_F", 0x%"X32_F")\n",
+          ip4_addr_get_u32(&iphdr->dest), ip4_addr_get_u32(&netif->ip_addr),
+          ip4_addr_get_u32(&iphdr->dest) & ip4_addr_get_u32(&netif->netmask),
+          ip4_addr_get_u32(&netif->ip_addr) & ip4_addr_get_u32(&netif->netmask),
+          ip4_addr_get_u32(&iphdr->dest) & ~ip4_addr_get_u32(&netif->netmask)));
+
+      /* interface is up and configured? */
+      if ((netif_is_up(netif)) && (!ip_addr_isany(&(netif->ip_addr)))) {
+        /* unicast to this interface address? */
+        if (ip_addr_cmp(&current_iphdr_dest, &(netif->ip_addr)) ||
+            /* or broadcast on this interface network address? */
+            ip_addr_isbroadcast(&current_iphdr_dest, netif)) {
+          LWIP_DEBUGF(IP_DEBUG, ("ip_input: packet accepted on interface %c%c\n",
+              netif->name[0], netif->name[1]));
+          /* break out of for loop */
+          break;
+        }
+#if LWIP_AUTOIP
+        /* connections to link-local addresses must persist after changing
+           the netif's address (RFC3927 ch. 1.9) */
+        if ((netif->autoip != NULL) &&
+            ip_addr_cmp(&current_iphdr_dest, &(netif->autoip->llipaddr))) {
+          LWIP_DEBUGF(IP_DEBUG, ("ip_input: LLA packet accepted on interface %c%c\n",
+              netif->name[0], netif->name[1]));
+          /* break out of for loop */
+          break;
+        }
+#endif /* LWIP_AUTOIP */
+      }
+      if (first) {
+        first = 0;
+        netif = netif_list;
+      } else {
+        netif = netif->next;
+      }
+      if (netif == inp) {
+        netif = netif->next;
+      }
+    } while(netif != NULL);
   }
 
 #if IP_ACCEPT_LINK_LAYER_ADDRESSING
@@ -826,14 +824,12 @@ ip_output(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
      gets altered as the packet is passed down the stack */
   LWIP_ASSERT("p->ref == 1", p->ref == 1);
 
-    /* tun2socks: do not use route table, instead, we use the first netif */
-//  if ((netif = ip_route(dest)) == NULL) {
-//    LWIP_DEBUGF(IP_DEBUG, ("ip_output: No route to %"U16_F".%"U16_F".%"U16_F".%"U16_F"\n",
-//      ip4_addr1_16(dest), ip4_addr2_16(dest), ip4_addr3_16(dest), ip4_addr4_16(dest)));
-//    IP_STATS_INC(ip.rterr);
-//    return ERR_RTE;
-//  }
-    netif = netif_list;
+  if ((netif = ip_route(dest)) == NULL) {
+    LWIP_DEBUGF(IP_DEBUG, ("ip_output: No route to %"U16_F".%"U16_F".%"U16_F".%"U16_F"\n",
+      ip4_addr1_16(dest), ip4_addr2_16(dest), ip4_addr3_16(dest), ip4_addr4_16(dest)));
+    IP_STATS_INC(ip.rterr);
+    return ERR_RTE;
+  }
 
   return ip_output_if(p, src, dest, ttl, tos, proto, netif);
 }
