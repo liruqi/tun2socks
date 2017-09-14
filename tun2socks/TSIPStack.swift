@@ -68,6 +68,7 @@ public final class TSIPStack {
         tcp_accept(pcb, tcpAcceptFn)
         
         netif_list.pointee.output = outputPCB
+        netif_set_default(interface)
     }
     
     private func checkTimeout() {

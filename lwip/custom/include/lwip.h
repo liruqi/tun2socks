@@ -340,6 +340,9 @@ extern struct netif *netif_list;
 extern struct netif *netif_default;
 
 struct netif;
+
+void netif_set_default(struct netif *netif);
+
 /** Function prototype for netif init functions. Set up flags and output/linkoutput
  * callback functions in this function.
  *
