@@ -129,7 +129,7 @@ public final class TSIPStack {
     }
     
     func didAcceptTCPSocket(_ pcb: UnsafeMutablePointer<tcp_pcb>, error: err_t) -> err_t {
-        tcp_accepted_c(listenPCB)
+        tcp_backlog_accepted_c(listenPCB)
         delegate?.didAcceptTCPSocket(TSTCPSocket(pcb: pcb, queue: processQueue))
         return err_t(ERR_OK)
     }

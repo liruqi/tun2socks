@@ -27,10 +27,7 @@ typedef unsigned   short   u16_t;
 typedef signed     short   s16_t;
 typedef unsigned   int     u32_t;
 typedef signed     int     s32_t;
-
-typedef unsigned long mem_ptr_t;
-
-
+typedef unsigned   long    mem_ptr_t;
 typedef s8_t err_t;
 
 /* Definitions for error constants. */
@@ -141,51 +138,8 @@ u16_t pbuf_copy_partial(struct pbuf *p, void *dataptr, u16_t len, u16_t offset);
 err_t pbuf_take(struct pbuf *buf, const void *dataptr, u16_t len);
 
 
-/* This is the common part of all PCB types. It needs to be at the
- beginning of a PCB type definition. It is located here so that
- changes to this common part are made in one location instead of
- having to change all PCB structs. */
-#define IP_PCB \
-/* ip addresses in network byte order */ \
-ip_addr_t local_ip; \
-ip_addr_t remote_ip; \
-/* Socket options */  \
-u8_t so_options;      \
-/* Type Of Service */ \
-u8_t tos;              \
-/* Time To Live */     \
-u8_t ttl
-
-#define DEF_ACCEPT_CALLBACK  tcp_accept_fn accept;
-
-/**
- * members common to struct tcp_pcb and struct tcp_listen_pcb
- */
-#define TCP_PCB_COMMON(type) \
-type *next; /* for the linked list */ \
-void *callback_arg; \
-/* the accept callback for listen- and normal pcbs, if LWIP_CALLBACK_API */ \
-DEF_ACCEPT_CALLBACK \
-enum tcp_state state; /* TCP state */ \
-u8_t prio; \
-/* ports are in host byte order */ \
-u16_t local_port
-
-enum tcp_state {
-    CLOSED      = 0,
-    LISTEN      = 1,
-    SYN_SENT    = 2,
-    SYN_RCVD    = 3,
-    ESTABLISHED = 4,
-    FIN_WAIT_1  = 5,
-    FIN_WAIT_2  = 6,
-    CLOSE_WAIT  = 7,
-    CLOSING     = 8,
-    LAST_ACK    = 9,
-    TIME_WAIT   = 10
-};
-
 struct tcp_pcb;
+
 /** Function prototype for tcp accept callback functions. Called when a new
  * connection can be accepted on a listening pcb.
  *
@@ -196,17 +150,6 @@ struct tcp_pcb;
  *            callback function!
  */
 typedef err_t (*tcp_accept_fn)(void *arg, struct tcp_pcb *newpcb, err_t err);
-
-/* the TCP protocol control block */
-struct tcp_pcb {
-    /** common PCB members */
-    IP_PCB;
-    /** protocol specific PCB members */
-    TCP_PCB_COMMON(struct tcp_pcb);
-    
-    /* ports are in host byte order */
-    u16_t remote_port;
-};
 
 /** Function prototype for tcp receive callback functions. Called when data has
  * been received.
@@ -219,7 +162,7 @@ struct tcp_pcb {
  *            callback function!
  */
 typedef err_t (*tcp_recv_fn)(void *arg, struct tcp_pcb *tpcb,
-                             struct pbuf *p, err_t err);
+struct pbuf *p, err_t err);
 
 /** Function prototype for tcp sent callback functions. Called when sent data has
  * been acknowledged by the remote side. Use it to free corresponding resources.
@@ -233,7 +176,7 @@ typedef err_t (*tcp_recv_fn)(void *arg, struct tcp_pcb *tpcb,
  *            callback function!
  */
 typedef err_t (*tcp_sent_fn)(void *arg, struct tcp_pcb *tpcb,
-                             u16_t len);
+u16_t len);
 
 /** Function prototype for tcp poll callback functions. Called periodically as
  * specified by @see tcp_poll.
@@ -264,7 +207,7 @@ typedef void  (*tcp_err_fn)(void *arg, err_t err);
  *
  * @param arg Additional argument to pass to the callback function (@see tcp_arg())
  * @param tpcb The connection pcb which is connected
- * @param err An unused error code, always ERR_OK currently ;-) TODO!
+ * @param err An unused error code, always ERR_OK currently ;-) @todo!
  *            Only return ERR_ABRT if you have called tcp_abort from within the
  *            callback function!
  *
@@ -272,18 +215,70 @@ typedef void  (*tcp_err_fn)(void *arg, err_t err);
  */
 typedef err_t (*tcp_connected_fn)(void *arg, struct tcp_pcb *tpcb, err_t err);
 
+enum tcp_state {
+    CLOSED      = 0,
+    LISTEN      = 1,
+    SYN_SENT    = 2,
+    SYN_RCVD    = 3,
+    ESTABLISHED = 4,
+    FIN_WAIT_1  = 5,
+    FIN_WAIT_2  = 6,
+    CLOSE_WAIT  = 7,
+    CLOSING     = 8,
+    LAST_ACK    = 9,
+    TIME_WAIT   = 10
+};
 
+/** This is the common part of all PCB types. It needs to be at the
+ beginning of a PCB type definition. It is located here so that
+ changes to this common part are made in one location instead of
+ having to change all PCB structs. */
+#define IP_PCB \
+/* ip addresses in network byte order */ \
+ip_addr_t local_ip; \
+ip_addr_t remote_ip; \
+/* Socket options */  \
+u8_t so_options;      \
+/* Type Of Service */ \
+u8_t tos;              \
+/* Time To Live */     \
+u8_t ttl               \
 
+/**
+ * members common to struct tcp_pcb and struct tcp_listen_pcb
+ */
+#define TCP_PCB_COMMON(type) \
+type *next; /* for the linked list */ \
+void *callback_arg; \
+enum tcp_state state; /* TCP state */ \
+u8_t prio; \
+/* ports are in host byte order */ \
+u16_t local_port
+
+/* the TCP protocol control block */
+struct tcp_pcb {
+    /** common PCB members */
+    IP_PCB;
+    /** protocol specific PCB members */
+    TCP_PCB_COMMON(struct tcp_pcb);
+    
+    /* ports are in host byte order */
+    u16_t remote_port;
+};
 
 /* Application program's interface: */
-struct tcp_pcb * tcp_new     (void);
 
+struct tcp_pcb * tcp_new     (void);
+struct tcp_pcb * tcp_new_ip_type (u8_t type);
+
+/* LWIP_CALLBACK_API */
 void             tcp_arg     (struct tcp_pcb *pcb, void *arg);
-void             tcp_accept  (struct tcp_pcb *pcb, tcp_accept_fn accept);
 void             tcp_recv    (struct tcp_pcb *pcb, tcp_recv_fn recv);
 void             tcp_sent    (struct tcp_pcb *pcb, tcp_sent_fn sent);
-void             tcp_poll    (struct tcp_pcb *pcb, tcp_poll_fn poll, u8_t interval);
 void             tcp_err     (struct tcp_pcb *pcb, tcp_err_fn err);
+void             tcp_accept  (struct tcp_pcb *pcb, tcp_accept_fn accept);
+
+void             tcp_poll    (struct tcp_pcb *pcb, tcp_poll_fn poll, u8_t interval);
 
 #define          tcp_mss(pcb)             (((pcb)->flags & TF_TIMESTAMP) ? ((pcb)->mss - 12)  : (pcb)->mss)
 #define          tcp_sndbuf(pcb)          ((pcb)->snd_buf)
@@ -293,21 +288,24 @@ void             tcp_err     (struct tcp_pcb *pcb, tcp_err_fn err);
 #define          tcp_nagle_disabled(pcb)  (((pcb)->flags & TF_NODELAY) != 0)
 
 #if TCP_LISTEN_BACKLOG
-#define          tcp_accepted(pcb) do { \
-LWIP_ASSERT("pcb->state == LISTEN (called for wrong pcb?)", pcb->state == LISTEN); \
-(((struct tcp_pcb_listen *)(pcb))->accepts_pending--); } while(0)
+void             tcp_backlog_accepted(struct tcp_pcb* pcb);
 #else  /* TCP_LISTEN_BACKLOG */
-#define          tcp_accepted(pcb) LWIP_ASSERT("pcb->state == LISTEN (called for wrong pcb?)", \
-(pcb)->state == LISTEN)
+#define          tcp_backlog_accepted(pcb)
 #endif /* TCP_LISTEN_BACKLOG */
+#define          tcp_accepted(pcb) /* compatibility define, not needed any more */
 
 void             tcp_recved  (struct tcp_pcb *pcb, u16_t len);
-err_t            tcp_bind    (struct tcp_pcb *pcb, ip_addr_t *ipaddr,
+err_t            tcp_bind    (struct tcp_pcb *pcb, const ip_addr_t *ipaddr,
                               u16_t port);
-err_t            tcp_connect (struct tcp_pcb *pcb, ip_addr_t *ipaddr,
+err_t            tcp_connect (struct tcp_pcb *pcb, const ip_addr_t *ipaddr,
                               u16_t port, tcp_connected_fn connected);
 
+#define TCP_DEFAULT_LISTEN_BACKLOG 0xff
+
+void tcp_backlog_accepted_c(struct tcp_pcb *pcb);
+struct tcp_pcb * tcp_listen_with_backlog_and_err(struct tcp_pcb *pcb, u8_t backlog, err_t *err);
 struct tcp_pcb * tcp_listen_with_backlog(struct tcp_pcb *pcb, u8_t backlog);
+/** @ingroup tcp_raw */
 #define          tcp_listen(pcb) tcp_listen_with_backlog(pcb, TCP_DEFAULT_LISTEN_BACKLOG)
 
 void             tcp_abort (struct tcp_pcb *pcb);
@@ -329,9 +327,11 @@ void             tcp_setprio (struct tcp_pcb *pcb, u8_t prio);
 
 err_t            tcp_output  (struct tcp_pcb *pcb);
 
-void tcp_accepted_c(struct tcp_pcb *pcb);
-#define TCP_DEFAULT_LISTEN_BACKLOG 0xff
-struct tcp_pcb * tcp_listen_with_backlog(struct tcp_pcb *pcb, u8_t backlog);
+
+const char* tcp_debug_state_str(enum tcp_state s);
+
+/* for compatibility with older implementation */
+#define tcp_new_ip6() tcp_new_ip_type(IPADDR_TYPE_V6)
 
 
 /** The list of network interfaces. */

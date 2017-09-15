@@ -3,6 +3,6 @@
 
 #include "lwip/tcp.h"
 
-void tcp_accepted_c(struct tcp_pcb *pcb);
+void tcp_backlog_accepted_c(struct tcp_pcb *pcb);
 
 #endif /* compat_h */

@@ -606,11 +606,6 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
 //    npcb->local_port = pcb->local_port;
     npcb->local_port = tcphdr->dest;
     npcb->remote_port = tcphdr->src;
-    {
-        u16_t port1 = htons(npcb->local_port);
-        u16_t port2 = htons(npcb->remote_port);
-        u16_t port3 = htons(pcb->local_port);
-    }
     npcb->state = SYN_RCVD;
     npcb->rcv_nxt = seqno + 1;
     npcb->rcv_ann_right_edge = npcb->rcv_nxt;
