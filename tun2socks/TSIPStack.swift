@@ -67,7 +67,7 @@ public final class TSIPStack {
         listenPCB = pcb!
         tcp_accept(pcb, tcpAcceptFn)
         
-        netif_list.pointee.output = outputPCB
+        interface.pointee.output = outputPCB
         netif_set_default(interface)
     }
     
@@ -116,13 +116,14 @@ public final class TSIPStack {
         packet.copyBytes(to: buf.pointee.payload.bindMemory(to: UInt8.self, capacity: packet.count), count: packet.count)
         
         // The `netif->input()` should be ip_input(). According to the docs of lwip, we do not pass packets into the `ip_input()` function directly.
-        _ = netif_list.pointee.input(buf, interface)
+        _ = interface.pointee.input(buf, interface)
     }
     
     func writeOut(pbuf: UnsafeMutablePointer<pbuf>) {
-        var data = Data(count: Int(pbuf.pointee.tot_len))
+        let length = pbuf.pointee.tot_len
+        var data = Data.init(count: Int(length))
         _ = data.withUnsafeMutableBytes {
-            pbuf_copy_partial(pbuf, $0, pbuf.pointee.tot_len, 0)
+            pbuf_copy_partial(pbuf, $0, length, 0)
         }
         // Only support IPv4 as of now.
         outputBlock([data], [NSNumber(value: AF_INET)])
