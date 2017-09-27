@@ -1,6 +1,6 @@
 tun2socks
 =========
-[![Build Status](https://travis-ci.org/Hmyy/tun2socks.svg?branch=master)](https://travis-ci.org/Hmyy/tun2socks) [![GitHub release](https://img.shields.io/github/release/Hmyy/tun2socks.svg?maxAge=2592000)](https://github.com/Hmyy/tun2socks/releases) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![GitHub license](https://img.shields.io/badge/license-BSD_3--Clause-blue.svg)](https://raw.githubusercontent.com/Hmyy/NEKit/master/LICENSE.md)
+[![Build Status](https://travis-ci.org/Hmyy/tun2socks.svg?branch=master)](https://travis-ci.org/Hmyy/tun2socks) [![GitHub release](https://img.shields.io/github/release/Hmyy/tun2socks.svg?maxAge=3600)](https://github.com/Hmyy/tun2socks/releases) [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![GitHub license](https://img.shields.io/badge/license-BSD_3--Clause-blue.svg)](https://raw.githubusercontent.com/Hmyy/NEKit/master/LICENSE.md)
 
 tun2socks is designed to work with the NetworkExtension framework. It is based on the latest stable lwip with minimal modification.
 
@@ -28,7 +28,7 @@ The overall structure of tun2socks:
                                                                 └──────────────┘
 ```
 
-Fully documented API reference can be found [here](https://Hmyy.github.io/tun2socks/).
+Fully documented API reference can be found [here](https://zhuhaow.github.io/tun2socks/).
 
 [Carthage](https://github.com/Carthage/Carthage) is recommended to integrate tun2socks by adding
 
@@ -38,10 +38,9 @@ github "Hmyy/tun2socks"
 
 to the `Cartfile`.
 
-Another alternative may be [NEKit](https://github.com/Hmyy/NEKit) which uses tun2socks and provides many features to build a proxy app.
+Another alternative may be [NEKit](https://github.com/zhuhaow/NEKit) which uses tun2socks and provides many features to build a proxy app.
 
 IPv6 support
 ------------
-As of now, IPv6 is not supported since lwip 1.4 does not support dual stack.
-IPv6 will be supported in the next major version of lwip.
+TODO.
 
