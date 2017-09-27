@@ -1,5 +1,7 @@
 language: objective-c
 osx_image: xcode8.3
+rvm:
+- 2.3.1
 install:
 - gem install xcpretty
 script:
@@ -12,9 +14,10 @@ before_deploy:
 - carthage archive tun2socks lwip
 deploy:
   provider: releases
+  skip_cleanup: true
   api_key:
     secure: YcLYpNTh96ddxtGsGO4dM02xAfT/NisI+Jwa4z1ER6TNXHVZ0zfgUsWzkikEth8YljzFW/cLRKwIdRct+Rc+M1Kpqc4PG2jaC2dLJFAG4J2ga5RxpDPNhbQq1Y3nt8BcMaxduKQPx65YO/6el5r/LPBQpYaIGdxO82smYl27UnipnjXx6quVn/n3uC2+HonQF7Z12MUND7UscUoqqmjWO74nZuN2CD80wIolAcRQXEtpbHtM5zkk4eJfuVl2l82kaMUU+1g0bUxl8gPaDHqPvBgWKw7SVI+z3a0rymDzq3ZypzhkazW7FjuPG8Zsu/YrJXLrGgPO6J9Kw6ALTQ+0leEDegcC0fWuVat9lSTIER/fI4S1/imiuu31uC9XBLlKPy0G8FkBxESYwj2MOfmKMVVaAITlYcHE92skfdlv3h8vlEpNNU8tVDUTQCLkOgkTIawm99AKkL+moip6taeLSo2tcJ0mj9cTDEOi9J5jOK1Zr/AZQsGDYvOcr0luxJ+60kPGHBiJrOXuVWX6JUvC0RYAqoZWNgJcgeaXCsthFeCb4YtoU/laj1ilUL29kac1YpOCYJf8zslUCNY9W6aXuPaVHBeZCXXeqljZ877XXW2GxMMvcBUCYw8sZ7K9csR5u1ql+tdT0g5V8NkfHyaJlsEGSSz3aq6otaHIaUTQAEE=
   file: tun2socks.framework.zip
   on:
     repo: Hmyy/tun2socks
-    branch: lwip2.0.2
+    tag: true
