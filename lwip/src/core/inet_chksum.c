@@ -392,6 +392,7 @@ ip_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
     return inet_chksum_pseudo(p, proto, proto_len, ip_2_ip4(src), ip_2_ip4(dest));
   }
 #endif /* LWIP_IPV4 */
+    return 0;
 }
 
 /** Parts of the pseudo checksum which are common to IPv4 and IPv6 */
@@ -539,6 +540,7 @@ ip_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
     return inet_chksum_pseudo_partial(p, proto, proto_len, chksum_len, ip_2_ip4(src), ip_2_ip4(dest));
   }
 #endif /* LWIP_IPV4 */
+    return 0;
 }
 
 /* inet_chksum:
@@ -552,7 +554,7 @@ ip_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
  */
 
 u16_t
-inet_chksum(const void *dataptr, u16_t len)
+inet_chksum(void *dataptr, u16_t len)
 {
   return (u16_t)~(unsigned int)LWIP_CHKSUM(dataptr, len);
 }

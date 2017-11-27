@@ -107,11 +107,11 @@ lwip_strnstr(const char* buffer, const char* token, size_t n)
   const char* p;
   size_t tokenlen = strlen(token);
   if (tokenlen == 0) {
-    return LWIP_CONST_CAST(char *, buffer);
+    return buffer;
   }
   for (p = buffer; *p && (p + tokenlen <= buffer + n); p++) {
     if ((*p == *token) && (strncmp(p, token, tokenlen) == 0)) {
-      return LWIP_CONST_CAST(char *, p);
+      return p;
     }
   }
   return NULL;

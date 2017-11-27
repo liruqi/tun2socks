@@ -69,8 +69,8 @@
 PACK_STRUCT_BEGIN
 struct packed_struct_test
 {
-  PACK_STRUCT_FLD_8(u8_t  dummy1);
-  PACK_STRUCT_FIELD(u32_t dummy2);
+  u8_t  dummy1;
+  u32_t dummy2;
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
@@ -339,7 +339,6 @@ lwip_init(void)
 #ifndef LWIP_SKIP_CONST_CHECK
   int a;
   LWIP_UNUSED_ARG(a);
-  LWIP_ASSERT("LWIP_CONST_CAST not implemented correctly. Check your lwIP port.", LWIP_CONST_CAST(void*, &a) == &a);
 #endif
 #ifndef LWIP_SKIP_PACKING_CHECK
   LWIP_ASSERT("Struct packing not implemented correctly. Check your lwIP port.", sizeof(struct packed_struct_test) == PACKED_STRUCT_TEST_EXPECTED_SIZE);
